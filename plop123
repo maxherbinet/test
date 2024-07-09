@@ -1,0 +1,44 @@
+from PyPDF2 import PdfWriter, PdfReader
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+
+# create text watermark with customizable transparency
+pdf = canvas.Canvas("watermark_text.pdf", pagesize=A4)
+pdf.translate(inch, inch) # move the current origin point of the canvas by the given horizontal and vertical distances
+pdf.setFillColor(colors.red, alpha=0.3) # input the color value and use the alpha value to adjust the transparency of watermark
+pdf.setFont("Helvetica", 35) # input the font and font size
+pdf.rotate(45) # we can rotate the canvas by 45 degrees if needed
+pdf.drawCentredString(250, 100, "Confidential document") # choose the positive you would like to put the watermark
+pdf.drawCentredString(250, 50, "") # choose the positive you would like to put the watermark
+pdf.drawCentredString(250, 0, "Partner SFR") # choose the positive you would like to put the watermark
+pdf.save() # export the watermark
+
+# add watermark or logo in an existing pdf 
+# the watermark is placed in the front
+watermark_page = PdfReader('watermark_text.pdf').pages[0]
+pdf_reader = PdfReader('Sample.pdf')
+pdf_writer = PdfWriter()
+
+# Watermark all the pages
+for i in range(len(pdf_reader.pages)):
+    page = pdf_reader.pages[i]
+    page.merge_page(watermark_page)
+    pdf_writer.add_page(page)
+
+with open('plain2.pdf', 'wb') as out:
+    pdf_writer.write(out)
+
+#Encrypting another copy
+reader = PdfReader('plain.pdf')
+writer = PdfWriter()
+
+for page in reader.pages:
+    writer.add_page(page)
+
+writer.encrypt(user_password='#roadtosase', owner_password='xgW!@qEusfU3HW0Lu8', permissions_flag=0b00000000)
+
+# Save it
+with open("encrypted.pdf", "wb") as f:
+    writer.write(f)
